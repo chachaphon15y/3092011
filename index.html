@@ -3,6 +3,7 @@
 <title>TradeJournal — Trading Journal &amp; Calendar</title><link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.1"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{color-scheme:dark;--bg:#070b16;--cd:#101830;--bd:rgba(255,255,255,.09);--tx:#e8edf8;--mu:#8b9ac0;--ac:#7c6cff;--cy:#22d3ee;--up:#2ee59d;--dn:#ff5c7c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -210,6 +211,48 @@ html.lite .nw-spin,html.lite .hm-dot{animation:none!important}
 .lite #ov,.lite #cf,.lite #gm,.lite #sh{background:rgba(2,5,14,.9)!important}
 .lite #bn{background:rgba(7,11,22,.97)!important}
 .lite *{-webkit-mask-image:none!important;mask-image:none!important}
+
+/* ===== [1] Data persistence warning banner ===== */
+.bk{display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px;padding:14px 16px;margin-bottom:16px;border-radius:16px;border:1px solid #f59e0b;background:linear-gradient(135deg,rgba(245,158,11,.14),rgba(245,158,11,.05));box-shadow:0 10px 30px -14px rgba(245,158,11,.45)}
+.bk .bi{font-size:24px;line-height:1;flex:none}
+.bk .bt{flex:1 1 240px;min-width:0;font-size:13px;line-height:1.8;color:#fcd34d}
+.bk .bt b{display:inline-block;margin-bottom:2px;color:#fde68a;font-size:14px}
+.bk .btn{flex:none;min-height:44px;white-space:normal;text-align:center}
+@media (max-width:520px){.bk .btn{flex:1 1 100%}}
+
+/* ===== [2] Trade Log: responsive table / mobile cards ===== */
+.lgt{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.lgc{display:none}
+.lgk{padding:14px 15px;margin-bottom:10px}
+.lgk-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lgk-pr{display:flex;align-items:center;gap:8px;min-width:0;font-size:16px}
+.lgk-pr b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lgk-dir{flex:none;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.04em;border:1px solid currentColor;background:rgba(255,255,255,.04)}
+.lgk-pnl{flex:none;font-size:18px;font-family:'Sora',sans-serif}
+.lgk-meta{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:12px;color:var(--mu);line-height:1.6}
+.lgk-st{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px;padding:10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--bd)}
+.lgk-st div{min-width:0;font-size:13px;overflow-wrap:anywhere}
+.lgk-st .lb{margin-bottom:3px;font-size:10px}
+.lgk-tg{margin-top:8px;font-size:12px;line-height:1.7;color:var(--mu);overflow-wrap:anywhere}
+.lgk-ac{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.lgk-ac .btn{min-height:44px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px}
+@media (max-width:767px){
+.lgt{display:none}
+.lgc{display:block}
+.lgio .btn{flex:1 1 calc(50% - 8px);min-height:44px;text-align:center}
+}
+@media (max-width:360px){.lgk-st{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ===== [3] Password / account security note ===== */
+.pwn{font-size:11.5px;line-height:1.75;color:var(--mu);padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid var(--bd)}
+
+/* ===== Supabase: loader + setup panel ===== */
+#ldv{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,5,14,.92)}
+.ldb{text-align:center;max-width:400px;color:var(--tx)}.ldb p{margin-top:14px;font-size:14px;line-height:1.8}
+.ldsp{width:44px;height:44px;margin:0 auto;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:var(--cy);animation:ldr 1s linear infinite}
+@keyframes ldr{to{transform:rotate(360deg)}}
+.sbs{padding:2px 0}.sbs summary{cursor:pointer;line-height:1.8}
+.sbq{max-height:220px;overflow:auto;margin-top:8px;padding:10px;border-radius:10px;background:rgba(5,9,22,.8);border:1px solid var(--bd);color:#cbd5e1;font-size:11px;line-height:1.6;white-space:pre;text-align:left}
 </style></head><body>
 <div id="bgs"><div class="stars"></div><div class="pt"></div><div class="pt b"></div><div class="orb"></div><div id="sky"></div><div class="gf"></div></div>
 <div id="app" class="flex min-h-screen" style="display:none">
@@ -235,8 +278,174 @@ function seed(){let s=11;const R_=()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15
 for(let i=62;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);if(d.getDay()%6==0||R_()<.25)continue;const n=R_()<.12?6:1+Math.floor(R_()*3);
 for(let k=0;k<n;k++){const pair=P(Object.keys(B)),[b,lo,hi,dc]=B[pair],dir=R_()<.5?'B':'S',si=Math.floor(R_()*4),rk=lo+R_()*(hi-lo),e=b*(1+(R_()-.5)*.02),sd=dir=='B'?1:-1,win=R_()<.57,rr=1.5+R_()*1.5,c=A$(pair),rd=x=>+x.toFixed(dc),ex=win?e+sd*rk*(1+R_()*1.6):e-sd*rk*(.8+R_()*.2),o=new Date(d);o.setHours(HR[si]+k,Math.floor(R_()*50),0);const ce=new Date(+o+(20+R_()*160)*6e4),tags=win?(R_()<.5?['Followed Plan Perfectly']:[]):(R_()<.6?[P(S.mist.slice(0,5))]:[]);
 out.push(calc({id:id++,acct:R_()<.85?S.accts[0].n:P(S.accts).n,pair,dir,lot:+Math.max(.01,Math.min(5,(100+R_()*100)/(rk*c))).toFixed(2),entry:rd(e),sl:rd(e-sd*rk),tp:rd(e+sd*rk*rr),exit:rd(ex),open:isot(o),close:isot(ce),trig:[P(S.trig)],tf:P(S.tf.slice(1,5)),ses:S.ses[si],tags,url:'',note:win?'Plan executed':'ทบทวนจุดเข้า'}))}}return out}
-function load(){try{const j=JSON.parse(ls('tj_d_'+U));if(j&&j.S){S=j.S;T=(j.T||[]).filter(t=>t.id>1e6);return}}catch(e){}S=dflt();T=[]}
-function save(){try{ls('tj_d_'+U,JSON.stringify({S,T}))}catch(e){}}
+/* ═════════ Supabase cloud layer (replaces localStorage for user data) ═════════
+   Option A: paste your project values below (the anon key is public by design; RLS protects the data).
+   Option B: leave both empty — the login page shows a small setup form and remembers them in this browser. */
+const SUPABASE_URL='',SUPABASE_ANON_KEY='';
+let sb=null,UID=null,TS={},PS=null,RECOV=false,RT=null,RTT=null,MIG=0,SYNC={t:null,run:false,again:false,err:false,last:0};
+const sbCfg=()=>({url:(SUPABASE_URL||ls('tj_sb_url')||'').trim(),key:(SUPABASE_ANON_KEY||ls('tj_sb_key')||'').trim()}),
+APP_URL=()=>location.origin+location.pathname,
+cj=v=>JSON.stringify(v,(k,x)=>x&&typeof x=='object'&&!Array.isArray(x)?Object.keys(x).sort().reduce((o,q)=>(o[q]=x[q],o),{}):x),
+nn=x=>Number.isFinite(x)?x:null,
+toRow=t=>({id:t.id,acct:t.acct,pair:t.pair,dir:t.dir,lot:nn(t.lot),entry:nn(t.entry),sl:nn(t.sl),tp:nn(t.tp),exit_price:nn(t.exit),pnl:nn(t.pnl)??0,r:nn(t.r)??0,rr:nn(t.rr)??0,open_at:t.open,close_at:t.close,trig:t.trig||[],tf:t.tf||'',ses:t.ses||'',tags:t.tags||[],url:t.url||'',note:t.note||''}),
+fromRow=r=>{const f=x=>x==null?NaN:+x,z=x=>x==null?0:+x;return{id:+r.id,acct:r.acct,pair:r.pair,dir:r.dir,lot:f(r.lot),entry:f(r.entry),sl:f(r.sl),tp:f(r.tp),exit:f(r.exit_price),pnl:z(r.pnl),r:z(r.r),rr:z(r.rr),open:r.open_at||'',close:r.close_at||'',trig:r.trig||[],tf:r.tf||'',ses:r.ses||'',tags:r.tags||[],url:r.url||'',note:r.note||''}},
+mapTrades=rows=>rows.map(fromRow).filter(t=>t.id>1e6),
+qs=ms=>{clearTimeout(SYNC.t);SYNC.t=setTimeout(()=>{SYNC.t=null;syncNow()},ms)},
+cloudTxt=()=>SYNC.err?L2('⚠️ บันทึกขึ้นคลาวด์ไม่สำเร็จ (กำลังลองใหม่)','⚠️ Cloud save failed (retrying)'):(SYNC.t||SYNC.run)?L2('⏳ กำลังบันทึก…','⏳ Saving…'):L2('✅ ซิงค์แล้ว','✅ Synced')+(SYNC.last?' · '+new Date(SYNC.last).toLocaleTimeString(LOC()):''),
+cloudPaint=()=>{const e=$('#cldst');if(e)e.textContent=cloudTxt()};
+function busy(msg,extra){let e=$('#ldv');if(!msg){if(e)e.style.display='none';return}if(!e){e=document.createElement('div');e.id='ldv';document.body.appendChild(e)}e.style.display='flex';e.innerHTML=`<div class="ldb">${extra?'':'<div class="ldsp"></div>'}<p>${msg}</p>${extra||''}</div>`}
+function ldErr(e){busy(L2('โหลดข้อมูลจากคลาวด์ไม่สำเร็จ','Could not load your data from the cloud')+'<br><span class="mu text-xs">'+esc((e&&e.message)||e)+'</span><br><span class="mu text-xs">'+L2('หากเพิ่งตั้งค่าครั้งแรก ตรวจสอบว่ารัน SQL สร้างตารางครบแล้ว','If this is a fresh setup, make sure the SQL tables have been created')+'</span>','<div class="flex gap-2 justify-center mt-4"><button class="btn bp" onclick="ldRetry()">'+L2('ลองอีกครั้ง','Retry')+'</button><button class="btn bd" onclick="logout()">'+L2('ออกจากระบบ','Log out')+'</button></div>')}
+async function ldRetry(){const{data}=await sb.auth.getSession();if(data.session)enter(data.session.user);else{busy(null);auth()}}
+const sbErr=e=>{const m=String((e&&e.message)||e||'').toLowerCase();
+if(m.includes('invalid login'))return 'Invalid email or password';
+if(m.includes('already registered'))return 'Email already registered';
+if(m.includes('not confirmed'))return L2('กรุณายืนยันอีเมลก่อน (ตรวจสอบกล่องจดหมายของคุณ)','Please confirm your email first (check your inbox)');
+if(m.includes('rate limit')||m.includes('too many'))return L2('ส่งคำขอบ่อยเกินไป กรุณารอสักครู่','Too many requests — please wait a moment');
+if(m.includes('failed to fetch')||m.includes('network'))return L2('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตหรือ Supabase URL','Cannot reach the server — check your connection or Supabase URL');
+return(e&&e.message)||'Error'};
+
+/* ── read from cloud ── */
+async function fetchCloud(){
+ const p=await sb.from('profiles').select('settings').eq('id',UID).maybeSingle();if(p.error)throw p.error;
+ let rows=[];for(let from=0;;from+=1000){const r=await sb.from('trades').select('*').eq('user_id',UID).order('close_at',{ascending:false}).range(from,from+999);if(r.error)throw r.error;rows=rows.concat(r.data||[]);if(!r.data||r.data.length<1000)break}
+ return{settings:p.data&&p.data.settings,rows}}
+async function load(){
+ const c=await fetchCloud(),has=c.settings&&Object.keys(c.settings).length;
+ T=mapTrades(c.rows);TS={};T.forEach(t=>{TS[t.id]=JSON.stringify(toRow(t))});MIG=0;
+ if(has){S=Object.assign(dflt(),c.settings);PS=cj(S)}
+ else{S=dflt();PS=null;
+  if(!T.length){try{const j=JSON.parse(ls('tj_d_'+String(U).toLowerCase()));if(j&&j.S){S=Object.assign(dflt(),j.S);T=(j.T||[]).filter(t=>t.id>1e6);MIG=T.length}}catch(e){}}}
+ SYNC.last=Date.now();SYNC.err=false}
+
+/* ── write to cloud (diff-based: insert/update via upsert, delete removed rows) ── */
+function save(){if(UID)qs(350)}
+async function syncOnce(){
+ const uid=UID,cur={};T.forEach(t=>{cur[t.id]=JSON.stringify(toRow(t))});
+ const sj=cj(S);
+ if(sj!==PS){const r=await sb.from('profiles').upsert({id:uid,display_name:UN,settings:S,updated_at:new Date().toISOString()});if(r.error)throw r.error;PS=sj}
+ const seen=new Set(),up=T.filter(t=>{if(seen.has(t.id))return false;seen.add(t.id);return TS[t.id]!==cur[t.id]}),del=Object.keys(TS).filter(k=>!(k in cur));
+ for(let i=0;i<up.length;i+=200){const ch=up.slice(i,i+200),r=await sb.from('trades').upsert(ch.map(t=>({user_id:uid,...toRow(t)})),{onConflict:'user_id,id'});if(r.error)throw r.error;ch.forEach(t=>{TS[t.id]=cur[t.id]})}
+ for(let i=0;i<del.length;i+=200){const ch=del.slice(i,i+200),r=await sb.from('trades').delete().eq('user_id',uid).in('id',ch.map(Number));if(r.error)throw r.error;ch.forEach(k=>{delete TS[k]})}
+ SYNC.last=Date.now()}
+async function syncNow(){
+ if(!UID||!sb)return;
+ if(SYNC.run){SYNC.again=true;return}
+ SYNC.run=true;
+ do{SYNC.again=false;
+  try{await syncOnce();SYNC.err=false}
+  catch(e){SYNC.err=true;console.error('sync',e);toast(L2('บันทึกขึ้นคลาวด์ไม่สำเร็จ — จะลองใหม่อัตโนมัติ','Cloud save failed — will retry automatically'));qs(10000);break}
+ }while(SYNC.again);
+ SYNC.run=false;cloudPaint()}
+async function flush(){clearTimeout(SYNC.t);SYNC.t=null;let n=0;while(SYNC.run&&n++<100)await new Promise(r=>setTimeout(r,100));await syncNow()}
+addEventListener('beforeunload',e=>{if(SYNC.t||SYNC.run||SYNC.err){e.preventDefault();e.returnValue=''}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&SYNC.t&&UID){clearTimeout(SYNC.t);SYNC.t=null;syncNow()}});
+
+/* ── pull latest (manual "Sync now" + realtime from other devices) ── */
+async function pull(quiet){
+ if(!UID)return;
+ if(SYNC.run||SYNC.t){if(quiet)rtHit();else toast(L2('กำลังบันทึกข้อมูลอยู่ รอสักครู่','Saving in progress — one moment'));return}
+ try{const c=await fetchCloud();if(SYNC.run||SYNC.t)return;
+  const nt=mapTrades(c.rows),nts={};nt.forEach(t=>{nts[t.id]=JSON.stringify(toRow(t))});
+  const ns=c.settings&&Object.keys(c.settings).length?Object.assign(dflt(),c.settings):null,
+  sameT=cj(Object.entries(nts).sort())===cj(Object.entries(TS).sort()),sameS=!ns||cj(ns)===PS;
+  if(sameT&&sameS){if(!quiet)toast(L2('ข้อมูลเป็นปัจจุบันแล้ว','Already up to date'));SYNC.last=Date.now();cloudPaint();return}
+  if(!sameT){T=nt;TS=nts}
+  if(!sameS){S=ns;PS=cj(S)}
+  SYNC.last=Date.now();R();toast(L2('ซิงค์ข้อมูลล่าสุดจากคลาวด์แล้ว','Synced the latest data from the cloud'))
+ }catch(e){if(!quiet)toast(sbErr(e))}}
+function rtHit(){clearTimeout(RTT);RTT=setTimeout(()=>pull(true),700)}
+function rtStart(){rtStop();try{RT=sb.channel('tj-'+UID).on('postgres_changes',{event:'*',schema:'public',table:'trades',filter:'user_id=eq.'+UID},rtHit).on('postgres_changes',{event:'*',schema:'public',table:'profiles',filter:'id=eq.'+UID},rtHit).subscribe()}catch(e){RT=null}}
+function rtStop(){try{if(RT&&sb)sb.removeChannel(RT)}catch(e){}RT=null}
+const SB_SQL=`-- =====================================================================
+--  TradeJournal  ·  Supabase schema   (run once in: SQL Editor → New query)
+-- =====================================================================
+
+-- 1) profiles : one row per user (display name + all personal settings as JSON)
+create table if not exists public.profiles (
+  id           uuid primary key references auth.users(id) on delete cascade,
+  display_name text,
+  settings     jsonb not null default '{}'::jsonb,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now()
+);
+
+-- 2) trades : one row per trade. (user_id, id) is the primary key;
+--    id is generated by the app (millisecond timestamp), so it works offline-first.
+create table if not exists public.trades (
+  user_id     uuid   not null default auth.uid() references auth.users(id) on delete cascade,
+  id          bigint not null,
+  acct        text,                                  -- trading account name
+  pair        text   not null,                       -- symbol, e.g. XAUUSD
+  dir         text   not null check (dir in ('B','S')),  -- B = BUY, S = SELL
+  lot         numeric,
+  entry       numeric,
+  sl          numeric,
+  tp          numeric,
+  exit_price  numeric,
+  pnl         numeric not null default 0,            -- profit / loss
+  r           numeric not null default 0,            -- R-multiple
+  rr          numeric not null default 0,            -- planned risk:reward
+  open_at     text,                                  -- 'YYYY-MM-DDTHH:mm' (local time as entered)
+  close_at    text,                                  -- 'YYYY-MM-DDTHH:mm' (local time as entered)
+  trig        text[] not null default '{}',          -- entry triggers / setups
+  tf          text,                                  -- timeframe
+  ses         text,                                  -- session
+  tags        text[] not null default '{}',          -- psychology / mistakes
+  url         text,                                  -- chart link
+  note        text,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  primary key (user_id, id)
+);
+
+create index if not exists trades_user_close_idx on public.trades (user_id, close_at desc);
+
+-- 3) keep updated_at fresh
+create or replace function public.tj_touch_updated_at() returns trigger
+language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end $$;
+
+drop trigger if exists tj_profiles_touch on public.profiles;
+create trigger tj_profiles_touch before update on public.profiles
+  for each row execute function public.tj_touch_updated_at();
+
+drop trigger if exists tj_trades_touch on public.trades;
+create trigger tj_trades_touch before update on public.trades
+  for each row execute function public.tj_touch_updated_at();
+
+-- 4) Row Level Security : every user can only see and change their own rows
+alter table public.profiles enable row level security;
+alter table public.trades   enable row level security;
+
+drop policy if exists "profiles_select_own" on public.profiles;
+drop policy if exists "profiles_insert_own" on public.profiles;
+drop policy if exists "profiles_update_own" on public.profiles;
+drop policy if exists "profiles_delete_own" on public.profiles;
+create policy "profiles_select_own" on public.profiles for select to authenticated using ((select auth.uid()) = id);
+create policy "profiles_insert_own" on public.profiles for insert to authenticated with check ((select auth.uid()) = id);
+create policy "profiles_update_own" on public.profiles for update to authenticated using ((select auth.uid()) = id) with check ((select auth.uid()) = id);
+create policy "profiles_delete_own" on public.profiles for delete to authenticated using ((select auth.uid()) = id);
+
+drop policy if exists "trades_select_own" on public.trades;
+drop policy if exists "trades_insert_own" on public.trades;
+drop policy if exists "trades_update_own" on public.trades;
+drop policy if exists "trades_delete_own" on public.trades;
+create policy "trades_select_own" on public.trades for select to authenticated using ((select auth.uid()) = user_id);
+create policy "trades_insert_own" on public.trades for insert to authenticated with check ((select auth.uid()) = user_id);
+create policy "trades_update_own" on public.trades for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
+create policy "trades_delete_own" on public.trades for delete to authenticated using ((select auth.uid()) = user_id);
+
+-- 5) (optional) Realtime: lets a second device update instantly
+do $$
+begin
+  begin alter publication supabase_realtime add table public.profiles; exception when duplicate_object then null; end;
+  begin alter publication supabase_realtime add table public.trades;   exception when duplicate_object then null; end;
+end $$;
+`;
+
 function toast(s){const e=$('#ts');e.textContent=t(s);e.style.display='block';setTimeout(()=>e.style.display='none',2600)}
 function st(a){const w=a.filter(t=>t.pnl>0),l=a.filter(t=>t.pnl<0),gp=w.reduce((x,t)=>x+t.pnl,0),gl=-l.reduce((x,t)=>x+t.pnl,0),n=a.length;let eq=initBal(),pk=eq,dd=0;[...a].sort((x,y)=>x.close<y.close?-1:1).forEach(t=>{eq+=t.pnl;pk=Math.max(pk,eq);dd=Math.max(dd,(pk-eq)/pk*100)});
 return{n,net:gp-gl,pct:a.reduce((x,t)=>x+pc(t),0),wr:n?w.length/n*100:0,pf:gl?gp/gl:(gp?99:0),rr:n?a.reduce((x,t)=>x+(t.rr||0),0)/n:0,dd,ex:n?(gp-gl)/n:0}}
@@ -290,10 +499,15 @@ wr('c2',t=>t.pair);wr('c3',t=>t.ses||'N/A');wr('c4',t=>t.trig.length?t.trig:['No
 const p=grp(a,t=>t.tags).sort((x,y)=>x.p-y.p);bar('c5',p.map(x=>`${x.k} (${x.n})`),p.map(x=>+x.p.toFixed(2)),p.map(x=>x.p>=0?'#10b981':'#f43f5e'),1);
 const w=p.find(x=>x.p<0);$('#ps').innerHTML=w?`<span>Biggest money-losing mistake:</span> <b class="dn">${w.k}</b> ${m(w.p)} / ${w.n} <span>trades</span>`:'No mistake data yet'}
 const io=()=>`<button class="btn" onclick="$('#fi').click()">⬆ <span>Import CSV</span> (MT5 / Exness)</button><button class="btn" onclick="dlf('trades.csv',csv(),'text/csv')">⬇ <span>Export CSV</span></button><button class="btn" onclick="dlf('trades-backup.json',JSON.stringify({settings:S,trades:T},null,1),'application/json')">⬇ <span>Export JSON</span></button>`;
-function lg(){const a=[...F()].sort((x,y)=>x.close<y.close?1:-1);$('#mn').innerHTML=`<div class="flex flex-wrap gap-2 mb-3">${io()}</div><div class="card overflow-x-auto"><table><thead><tr>${['Close','Account','Pair','Dir','Lot','Entry','Exit','PnL','R','Setup','Session','Tags',''].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${a.map(t=>`<tr><td>${t.close.replace('T',' ')}</td><td>${t.acct}</td><td><b>${t.pair}</b></td><td class="${t.dir=='B'?'up':'dn'}">${t.dir=='B'?'BUY':'SELL'}</td><td>${t.lot}</td><td>${t.entry}</td><td>${t.exit}</td><td class="${cc(t.pnl)}">${m(t.pnl)}</td><td>${t.r}</td><td>${t.trig.join(', ')}</td><td>${t.ses||''}</td><td class="mu">${t.tags.join(', ')}</td><td><button class="btn" onclick="fm(${t.id})">✎</button> <button class="btn bd" onclick="askDel(${t.id})">🗑</button></td></tr>`).join('')}</tbody></table></div>`}
+const lgCard=t=>{const buy=t.dir=='B',o=t.trig.join(', '),g=t.tags.map(x=>'#'+x).join(' ');return`<div class="card lgk"><div class="lgk-top"><div class="lgk-pr"><b>${esc(t.pair)}</b><span class="lgk-dir ${buy?'up':'dn'}">${buy?'BUY':'SELL'}</span></div><b class="lgk-pnl ${cc(t.pnl)}">${m(t.pnl)}</b></div><div class="lgk-meta"><span>📅 ${esc(t.close.replace('T',' '))}</span><span>🏦 ${esc(t.acct)}</span></div><div class="lgk-st"><div><div class="lb">${L2('ล็อต','Lot')}</div><b>${t.lot}</b></div><div><div class="lb">${L2('เข้า','Entry')}</div>${t.entry}</div><div><div class="lb">${L2('ออก','Exit')}</div>${t.exit}</div><div><div class="lb">R</div><span class="${cc(t.r)}">${t.r}</span></div></div>${(o||t.ses)?`<div class="lgk-tg">${[o,t.ses].filter(Boolean).map(esc).join(' · ')}</div>`:''}${g?`<div class="lgk-tg">${esc(g)}</div>`:''}<div class="lgk-ac"><button type="button" class="btn" onclick="fm(${t.id})">✎ ${L2('แก้ไข','Edit')}</button><button type="button" class="btn bd" onclick="askDel(${t.id})">🗑 ${L2('ลบ','Delete')}</button></div></div>`};
+function lg(){const a=[...F()].sort((x,y)=>x.close<y.close?1:-1);$('#mn').innerHTML=`<div class="flex flex-wrap gap-2 mb-3 lgio">${io()}</div><div class="card overflow-x-auto lgt"><table><thead><tr>${['Close','Account','Pair','Dir','Lot','Entry','Exit','PnL','R','Setup','Session','Tags',''].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${a.map(t=>`<tr><td>${t.close.replace('T',' ')}</td><td>${t.acct}</td><td><b>${t.pair}</b></td><td class="${t.dir=='B'?'up':'dn'}">${t.dir=='B'?'BUY':'SELL'}</td><td>${t.lot}</td><td>${t.entry}</td><td>${t.exit}</td><td class="${cc(t.pnl)}">${m(t.pnl)}</td><td>${t.r}</td><td>${t.trig.join(', ')}</td><td>${t.ses||''}</td><td class="mu">${t.tags.join(', ')}</td><td><button class="btn" onclick="fm(${t.id})">✎</button> <button class="btn bd" onclick="askDel(${t.id})">🗑</button></td></tr>`).join('')}</tbody></table></div><div class="lgc">${a.map(lgCard).join('')||`<div class="card p-4 mu text-center">${L2('ยังไม่มีรายการเทรด','No trades yet')}</div>`}</div>`}
 const HC=['id','account','pair','direction','lot','entry','sl','tp','exit','open','close','pnl','r','entry_trigger','timeframe','session','tags','url','note'];
 function csv(){const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';return[HC.join(','),...T.map(t=>[t.id,t.acct,t.pair,t.dir=='B'?'Buy':'Sell',t.lot,t.entry,t.sl,t.tp,t.exit,t.open,t.close,t.pnl,t.r,t.trig.join('|'),t.tf,t.ses,t.tags.join('|'),t.url,t.note].map(q).join(','))].join('\n')}
-async function dlf(name,txt,type){const d=window.claude?await claude.use('downloads'):null;if(!d)return toast('การดาวน์โหลดไม่พร้อมใช้งานในมุมมองนี้');try{await d.save({filename:name,data:new Blob([txt],{type})})}catch(e){}}
+async function dlf(name,txt,type){let d=null;try{d=window.claude?await claude.use('downloads'):null}catch(e){d=null}
+if(d){try{await d.save({filename:name,data:new Blob([txt],{type})})}catch(e){}return}
+try{const u=URL.createObjectURL(new Blob([txt],{type})),a=document.createElement('a');a.href=u;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast(L2('กำลังดาวน์โหลดไฟล์สำรองข้อมูล…','Downloading your backup…'))}catch(e){toast('การดาวน์โหลดไม่พร้อมใช้งานในมุมมองนี้')}}
+const exJ=()=>dlf('trades-backup.json',JSON.stringify({settings:S,trades:T},null,1),'application/json');
+const bkp=()=>`<div class="bk" role="alert"><span class="bi">☁️</span><div class="bt"><b>${L2('ข้อมูลของคุณซิงค์อยู่บนคลาวด์ — สำรองอีกชั้นเพื่อความปลอดภัย','Your data is synced to the cloud — keep an extra backup')}</b><br>${L2('ประวัติการเทรดถูกบันทึกไว้บนฐานข้อมูล Supabase ของบัญชีนี้ และเข้าถึงได้จากทุกอุปกรณ์เมื่อล็อกอิน แต่ควรกดสำรองข้อมูล (Export JSON/CSV) เก็บไว้เป็นระยะ เผื่อกรณีลบข้อมูลโดยไม่ตั้งใจ','Your trade history is stored in this account’s Supabase database and available on every device after login. Still, please export a backup (JSON/CSV) now and then in case of accidental deletion.')}</div><button type="button" class="btn bp" onclick="exJ()">${L2('⬇ สำรองข้อมูลทันที (Export JSON)','⬇ Back up now (Export JSON)')}</button></div>`;
 function pcsv(s){const dl=[',','\t',';'].map(d=>[d,s.split('\n')[0].split(d).length]).sort((a,b)=>b[1]-a[1])[0][0],rows=[];let r=[],c='',q=0;for(let i=0;i<s.length;i++){const x=s[i];if(q){if(x=='"'){if(s[i+1]=='"'){c+='"';i++}else q=0}else c+=x}else if(x=='"')q=1;else if(x==dl){r.push(c);c=''}else if(x=='\n'||x=='\r'){if(x=='\r'&&s[i+1]=='\n')i++;r.push(c);c='';rows.push(r);r=[]}else c+=x}if(c||r.length){r.push(c);rows.push(r)}return rows.filter(r=>r.some(v=>v.trim()))}
 function imp(txt){const X=pcsv(txt);if(X.length<2)return toast('ไฟล์ว่างหรืออ่านไม่ได้');const H=X[0].map(h=>h.trim().toLowerCase()),ix=(re,l)=>{const a=H.map((h,i)=>re.test(h)?i:-1).filter(i=>i>=0);return a.length?a[l?a.length-1:0]:-1},
 c={ot:ix(/open.?time|^open$|^time|^date/),ct:ix(/close.?time|^close$|^time/,1),sy:ix(/symbol|item|pair|instrument/),ty:ix(/type|direction|side/),vo:ix(/volume|lots?|size/),ep:ix(/open.?price|entry/),xp:ix(/close.?price|exit|^price/,1),sl:ix(/s\/l|^sl|stop/),tp:ix(/t\/p|^tp|take/),pr:ix(/profit|pnl/),ac:ix(/account/),tr:ix(/trigger|setup/),tf:ix(/timeframe/),se:ix(/session/),tg:ix(/tags/),nt:ix(/note|comment/)};if(c.ep<0)c.ep=ix(/^price/);
@@ -326,24 +540,68 @@ GL=s=>`<svg width="${s}" height="${s}" viewBox="0 0 48 48"><path fill="#EA4335" 
 LOGO='<span class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 8-9"/><path d="M15 6h5v5"/></svg></span>';
 function auth(){document.body.classList.remove('in');$('#app').style.display='none';$('#bn').style.display='none';const a=$('#au');a.style.display='block';
 const cells=[...Array(35)].map((_,i)=>{const v=(i*37+11)%7,al=((i*13)%5+3)/10;return v<3?`<i style="background:rgba(16,185,129,${al})"></i>`:v<5?`<i style="background:rgba(244,63,94,${al})"></i>`:'<i></i>'}).join('');
-a.innerHTML=`<div class="lp"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="lw"><section class="hero"><div class="brand">${LOGO}<div><b>TradeJournal</b><small>Trading diary</small></div></div><h1>${L2('บันทึกทุกไม้ <span class="gt">เทรดให้นิ่งขึ้น</span>','Journal every trade. <span class="gt">Trade with discipline.</span>')}</h1><p class="mu hp">${L2('ปฏิทิน PnL · วิเคราะห์ Win Rate · เตือนวินัยความเสี่ยง · ข้อมูลเก็บในเครื่องของคุณเอง','PnL calendar · Win-rate analytics · Risk alerts · Your data stays on your device')}</p><div class="mini">${cells}</div><div class="fch"><span>📅 PnL Calendar</span><span>📊 Analytics</span><span>🧠 Psychology</span><span>🛡 Risk Alerts</span></div></section><section class="lc card"><div class="flex justify-end mb-6"><select class="inp !w-auto" onchange="setLang(this.value)">${LG.map(l=>`<option value="${l[0]}" ${l[0]==LANG?'selected':''}>${l[1]}</option>`).join('')}</select></div>${stage()}<h2>${L2('ยินดีต้อนรับกลับมา','Welcome back')}</h2><p class="mu mb-4">${L2('ลงชื่อเข้าใช้เพื่อเปิดสมุดเทรดของคุณ','Sign in to open your trading journal')}</p>${authForm()}<button class="gbtn" onclick="gOpen()">${GL(20)}<span>Continue with Google</span></button><div class="mu text-xs mt-5 text-center">${L2('🔒 ข้อมูลเทรดถูกเก็บในเบราว์เซอร์ของคุณเท่านั้น','🔒 Your trades are stored only in this browser')}</div></section></div>${ftr()}</div>`;tr(a);if(AM=='up')pwHint('')}
-const sha=async s=>{if(!(window.crypto&&crypto.subtle))return 'x'+[0,1,2,3].map(k=>{let h=0x811c9dc5^k;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,'0')}).join('');return[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,'0')).join('')},
-users=()=>{try{return JSON.parse(ls('tj_users')||'{}')}catch(e){return{}}},
-PR=[['8 ตัวอักษรขึ้นไป','8+ characters',p=>p.length>=8],['A-Z ตัวพิมพ์ใหญ่','Uppercase A-Z',p=>/[A-Z]/.test(p)],['a-z ตัวพิมพ์เล็ก','Lowercase a-z',p=>/[a-z]/.test(p)],['0-9 ตัวเลข','Number 0-9',p=>/\d/.test(p)],['!@#$ อักขระพิเศษ','Symbol !@#$',p=>/[^A-Za-z0-9]/.test(p)]],
+a.innerHTML=`<div class="lp"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="lw"><section class="hero"><div class="brand">${LOGO}<div><b>TradeJournal</b><small>Trading diary</small></div></div><h1>${L2('บันทึกทุกไม้ <span class="gt">เทรดให้นิ่งขึ้น</span>','Journal every trade. <span class="gt">Trade with discipline.</span>')}</h1><p class="mu hp">${L2('ปฏิทิน PnL · วิเคราะห์ Win Rate · เตือนวินัยความเสี่ยง · ซิงค์ข้อมูลข้ามอุปกรณ์','PnL calendar · Win-rate analytics · Risk alerts · Cloud sync across devices')}</p><div class="mini">${cells}</div><div class="fch"><span>📅 PnL Calendar</span><span>📊 Analytics</span><span>🧠 Psychology</span><span>🛡 Risk Alerts</span></div></section><section class="lc card"><div class="flex justify-end mb-6"><select class="inp !w-auto" onchange="setLang(this.value)">${LG.map(l=>`<option value="${l[0]}" ${l[0]==LANG?'selected':''}>${l[1]}</option>`).join('')}</select></div>${stage()}<h2>${L2('ยินดีต้อนรับกลับมา','Welcome back')}</h2><p class="mu mb-4">${L2('ลงชื่อเข้าใช้เพื่อเปิดสมุดเทรดของคุณ','Sign in to open your trading journal')}</p>${sb?authForm()+'<button type="button" class="gbtn" onclick="gLogin()">'+GL(20)+'<span>Continue with Google</span></button>':setupForm()}<div class="mu text-xs mt-5 text-center">${L2('☁️ ข้อมูลเทรดซิงค์ไว้บนคลาวด์ของบัญชีคุณ ใช้ได้ทุกอุปกรณ์','☁️ Your trades sync to your cloud account — available on every device')}${sb&&!SUPABASE_URL?' · <a class="lnk" onclick="sbReset()">'+L2('เปลี่ยนโปรเจกต์','Change project')+'</a>':''}</div></section></div>${ftr()}</div>`;tr(a);if($('#sbq'))$('#sbq').textContent=SB_SQL;if(AM=='up')pwHint('')}
+
+
+const PR=[['8 ตัวอักษรขึ้นไป','8+ characters',p=>p.length>=8],['A-Z ตัวพิมพ์ใหญ่','Uppercase A-Z',p=>/[A-Z]/.test(p)],['a-z ตัวพิมพ์เล็ก','Lowercase a-z',p=>/[a-z]/.test(p)],['0-9 ตัวเลข','Number 0-9',p=>/\d/.test(p)],['!@#$ อักขระพิเศษ','Symbol !@#$',p=>/[^A-Za-z0-9]/.test(p)]],
 pwOk=p=>PR.every(r=>r[2](p)),
 pwHint=p=>{const e=$('#pr');if(e)e.innerHTML=PR.map(r=>`<span class="${r[2](p)?'ok':''}">${r[2](p)?'✓':'○'} ${L2(r[0],r[1])}</span>`).join('')},
-authForm=()=>`<div class="tabs"><button type="button" class="${AM=='in'?'on':''}" onclick="AM='in';auth()">Log In</button><button type="button" class="${AM=='up'?'on':''}" onclick="AM='up';auth()">Register</button></div><form onsubmit="return doAuth(event)" class="grid gap-3">${AM=='up'?'<input name="nm" class="inp" placeholder="Display name" autocomplete="name" required maxlength="40">':''}<input name="em" type="email" class="inp" placeholder="Email" autocomplete="email" required><div class="pw"><input name="pw" id="pw" type="password" class="inp" placeholder="Password" autocomplete="${AM=='in'?'current-password':'new-password'}" required ${AM=='up'?'oninput="pwHint(this.value)"':''}><button type="button" onclick="const i=$('#pw');i.type=i.type=='password'?'text':'password'">👁</button></div>${AM=='up'?'<div id="pr" class="prs"></div>':''}<div id="ae" class="dn text-sm"></div><button class="btn bp py-3">${AM=='in'?'Log In':'Create Account'}</button></form><div class="or">— or —</div>`;
-async function doAuth(e){e.preventDefault();const f=new FormData(e.target),em=f.get('em').trim().toLowerCase(),pw=f.get('pw'),us=users(),er=x=>{$('#ae').textContent=t(x)};
-if(AM=='up'){if(us[em])return er('Email already registered');if(!pwOk(pw))return er(L2('รหัสผ่านยังไม่ผ่านเงื่อนไขด้านล่าง','Password does not meet the rules below'));us[em]={h:await sha(pw+em),n:f.get('nm').trim()};ls('tj_users',JSON.stringify(us))}
-else if(!us[em]||us[em].h!=await sha(pw+em))return er('Invalid email or password');
-enter(em,us[em].n)}
-function gOpen(){const E=Object.entries(users()),m=$('#gm');m.style.display='flex';
-m.innerHTML=`<div class="gw"><div class="gbar"><i></i><i></i><i></i><span>🔒 accounts.google.com</span><b onclick="gClose()">✕</b></div><div class="gb">${GL(34)}<h3>Choose an account</h3><p>${L2('เพื่อไปยัง','to continue to')} <b>TradeJournal</b></p>${E.map(([e,x],i)=>`<div class="ga" onclick="gPw(${i})"><span class="av" style="background:${GC[i%5]}">${esc(x.n).slice(0,1).toUpperCase()}</span><div class="min-w-0"><b class="block truncate">${esc(x.n)}</b><small class="mu block truncate">${esc(e)}</small></div></div>`).join('')}<div class="ga" onclick="gClose();AM='up';auth()"><span class="av" style="background:#334155">👤</span><b>Use another account</b></div></div></div>`;tr(m)}
-const gClose=()=>$('#gm').style.display='none';
-function gPw(i){const em=Object.keys(users())[i],x=users()[em];$('.gb').innerHTML=`<span class="av" style="background:${GC[i%5]};margin:auto">${esc(x.n).slice(0,1).toUpperCase()}</span><h3>${esc(x.n)}</h3><p>${esc(em)}</p><form onsubmit="return gChk(event,'${i}')"><input type="password" class="ginp" placeholder="Password" autofocus required><div id="ge" class="gerr"></div><button class="gnext">Next</button></form>`;tr($('#gm'))}
-async function gChk(e,i){e.preventDefault();const em=Object.keys(users())[i],x=users()[em];if(x.h!=await sha(e.target[0].value+em))return $('#ge').textContent=t('Invalid email or password'),false;$('.gb').innerHTML=`<div class="spin"></div><p>${L2('กำลังลงชื่อเข้าใช้…','Signing in…')}</p>`;setTimeout(()=>{gClose();enter(em,x.n)},700);return false}
-function enter(u,n){U=u;UN=n;ls('tj_sess',JSON.stringify({u,n}));load();LANG=S.lang||LANG;S.lang=LANG;ls('tj_lang',LANG);document.body.classList.add('in');$('#au').style.display='none';$('#app').style.display='';$('#bn').style.display='';view='home';cur=new Date();cur.setDate(1);R()}
-function logout(){ls('tj_sess','');U=null;auth()}
+authForm=()=>`<div class="tabs"><button type="button" class="${AM=='in'?'on':''}" onclick="AM='in';auth()">Log In</button><button type="button" class="${AM=='up'?'on':''}" onclick="AM='up';auth()">Register</button></div><form onsubmit="return doAuth(event)" class="grid gap-3">${AM=='up'?'<input name="nm" class="inp" placeholder="Display name" autocomplete="name" required maxlength="40">':''}<input name="em" type="email" class="inp" placeholder="Email" autocomplete="email" required><div class="pw"><input name="pw" id="pw" type="password" class="inp" placeholder="Password" autocomplete="${AM=='in'?'current-password':'new-password'}" required ${AM=='up'?'oninput="pwHint(this.value)"':''}><button type="button" onclick="const i=$('#pw');i.type=i.type=='password'?'text':'password'">👁</button></div><div class="pwn">${L2('🔒 รหัสผ่านของคุณถูกเข้ารหัสแบบ hash และจัดเก็บอย่างปลอดภัยบนระบบสมาชิกของ Supabase (ไม่ได้เก็บไว้ในเครื่องนี้) หากลืมรหัสผ่าน สามารถกด "ลืมรหัสผ่าน" เพื่อรับลิงก์รีเซ็ตทางอีเมลได้','🔒 Your password is hashed and stored securely by Supabase Auth (not on this device). If you forget it, use “Forgot password” to get a reset link by email.')}</div>${AM=='in'?'<a class="lnk text-xs" onclick="forgotPw()">'+L2('ลืมรหัสผ่าน?','Forgot password?')+'</a>':''}${AM=='up'?'<div id="pr" class="prs"></div>':''}<div id="ae" class="dn text-sm"></div><button class="btn bp py-3">${AM=='in'?'Log In':'Create Account'}</button></form><div class="or">— or —</div>`;
+async function doAuth(e){e.preventDefault();const f=new FormData(e.target),em=f.get('em').trim().toLowerCase(),pw=f.get('pw'),ae=$('#ae'),er=(x,ok)=>{ae.className=(ok?'up':'dn')+' text-sm';ae.textContent=t(x)},bt=e.target.querySelector('button.bp');
+ if(!sb)return er(L2('ยังไม่ได้เชื่อมต่อ Supabase','Supabase is not connected'));
+ if(AM=='up'&&!pwOk(pw))return er(L2('รหัสผ่านยังไม่ผ่านเงื่อนไขด้านล่าง','Password does not meet the rules below'));
+ bt.disabled=true;er('');
+ try{
+  if(AM=='up'){const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{display_name:f.get('nm').trim()},emailRedirectTo:APP_URL()}});
+   if(error)return er(sbErr(error));
+   if(data.user&&data.user.identities&&!data.user.identities.length)return er('Email already registered');
+   if(!data.session)return er(L2('สมัครสำเร็จ! กรุณาตรวจสอบอีเมลเพื่อกดยืนยันบัญชี แล้วกลับมาล็อกอิน','Account created! Please confirm via the email we sent, then log in'),1)}
+  else{const{error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error)return er(sbErr(error))}
+ }catch(x){er(sbErr(x))}finally{bt.disabled=false}}
+async function gLogin(){if(!sb)return;try{const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:APP_URL()}});if(error)throw error}catch(x){const a=$('#ae');if(a){a.className='dn text-sm';a.textContent=sbErr(x)}else toast(sbErr(x))}}
+async function forgotPw(){const el=document.querySelector('#au input[name=em]'),em=el?el.value.trim().toLowerCase():'',ae=$('#ae'),msg=(x,ok)=>{ae.className=(ok?'up':'dn')+' text-sm';ae.textContent=t(x)};
+ if(!em)return msg(L2('กรอกอีเมลในช่องด้านบนก่อน แล้วกด "ลืมรหัสผ่าน" อีกครั้ง','Enter your email above, then tap "Forgot password" again'));
+ try{const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:APP_URL()});if(error)throw error;msg(L2('ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลแล้ว (ตรวจสอบกล่องสแปมด้วย)','Reset link sent — check your inbox (and spam)'),1)}catch(x){msg(sbErr(x))}}
+function pwResetM(){sheet(L2('ตั้งรหัสผ่านใหม่','Set a new password'),`<form onsubmit="return pwSet(event)" class="grid gap-3"><div class="pw"><input name="np" id="np" type="password" class="inp" placeholder="${L2('รหัสผ่านใหม่','New password')}" autocomplete="new-password" required oninput="pwHint(this.value)"><button type="button" onclick="const i=$('#np');i.type=i.type=='password'?'text':'password'">👁</button></div><div id="pr" class="prs"></div><div id="ae" class="dn text-sm"></div><button class="btn bp py-3">${L2('บันทึกรหัสผ่านใหม่','Save new password')}</button></form>`);pwHint('')}
+async function pwSet(e){e.preventDefault();const p=e.target.np.value,ae=$('#ae');if(!pwOk(p)){ae.textContent=L2('รหัสผ่านยังไม่ผ่านเงื่อนไขด้านล่าง','Password does not meet the rules below');return false}
+ try{const{error}=await sb.auth.updateUser({password:p});if(error)throw error;shx();toast(L2('เปลี่ยนรหัสผ่านเรียบร้อย','Password updated'))}catch(x){ae.textContent=sbErr(x)}return false}
+
+/* ── Supabase setup screen (shown only when URL / anon key are not configured) ── */
+const setupForm=()=>`<div class="sbs"><h3 class="font-semibold mb-1">☁️ ${L2('เชื่อมต่อ Supabase','Connect Supabase')}</h3>${window.supabase?'':'<div class="dn text-sm mb-2">'+L2('โหลดไลบรารี Supabase ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้า','Could not load the Supabase library — check your connection and refresh')+'</div>'}<p class="mu text-xs mb-3">${L2('ยังไม่ได้ตั้งค่าฐานข้อมูลกลาง — ใส่ Project URL และ anon public key จาก Supabase › Project Settings › API (เก็บไว้ในเบราว์เซอร์นี้ และ anon key ออกแบบมาให้เปิดเผยได้ ข้อมูลถูกปกป้องด้วย Row Level Security)','No cloud database configured yet — paste the Project URL and anon public key from Supabase › Project Settings › API (kept in this browser; the anon key is designed to be public, your data is protected by Row Level Security)')}</p><form onsubmit="return sbSave(event)" class="grid gap-3"><input name="u" class="inp" placeholder="https://xxxxxxxx.supabase.co" required inputmode="url" autocapitalize="off" autocomplete="off"><input name="k" class="inp" placeholder="anon public key" required autocapitalize="off" autocomplete="off"><div id="ae" class="dn text-sm"></div><button class="btn bp py-3">${L2('บันทึกและเริ่มใช้งาน','Save & continue')}</button></form><details class="mt-3"><summary class="lnk text-xs">${L2('📋 SQL สร้างตาราง (คัดลอกไปรันใน SQL Editor ก่อนใช้งานครั้งแรก)','📋 SQL to create the tables (run it once in the SQL Editor)')}</summary><pre id="sbq" class="sbq"></pre><button type="button" class="btn mt-2" onclick="sbCopy()">${L2('คัดลอก SQL','Copy SQL')}</button></details></div>`;
+function sbSave(e){e.preventDefault();const u=e.target.u.value.trim().replace(/\/+$/,''),k=e.target.k.value.trim(),ae=$('#ae');
+ if(!/^https:\/\/[^\s\/]+$/i.test(u)){ae.textContent=L2('Project URL ต้องขึ้นต้นด้วย https:// เช่น https://xxxx.supabase.co','Project URL must start with https://, e.g. https://xxxx.supabase.co');return false}
+ if(k.length<20){ae.textContent=L2('anon key สั้นเกินไป — ตรวจสอบว่าคัดลอกครบ','The anon key looks too short — make sure you copied all of it');return false}
+ if(!sbInit(u,k)){ae.textContent=L2('โหลดไลบรารี Supabase ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้า','Could not load the Supabase library — check your connection and refresh');return false}
+ ls('tj_sb_url',u);ls('tj_sb_key',k);auth();return false}
+function sbReset(){ls('tj_sb_url','');ls('tj_sb_key','');location.reload()}
+function sbCopy(){const done=()=>toast(L2('คัดลอก SQL แล้ว','SQL copied'));try{navigator.clipboard.writeText(SB_SQL).then(done,()=>{const r=document.createRange();r.selectNodeContents($('#sbq'));const s=getSelection();s.removeAllRanges();s.addRange(r)})}catch(x){const r=document.createRange();r.selectNodeContents($('#sbq'));const s=getSelection();s.removeAllRanges();s.addRange(r)}}
+function sbInit(url,key){
+ if(!window.supabase||!window.supabase.createClient)return false;
+ try{sb=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}catch(x){sb=null;return false}
+ sb.auth.onAuthStateChange((ev,ses)=>{
+  if(ev=='SIGNED_OUT'){UID=null;U=null;rtStop();busy(null);auth();return}
+  if(ev=='PASSWORD_RECOVERY'){RECOV=true;if(UID){setTimeout(()=>{RECOV=false;pwResetM()},200);return}}
+  if(ses&&ses.user&&(ev=='INITIAL_SESSION'||ev=='SIGNED_IN'||ev=='PASSWORD_RECOVERY')){if(UID!==ses.user.id)setTimeout(()=>enter(ses.user),0);return}
+  if(ev=='INITIAL_SESSION'&&!ses){busy(null);auth()}});
+ return true}
+
+/* ── enter / leave the app ── */
+async function enter(user){
+ const md=user.user_metadata||{};
+ UID=user.id;U=user.email||'';UN=md.display_name||md.full_name||md.name||U.split('@')[0]||'User';
+ busy(L2('กำลังโหลดข้อมูลจากคลาวด์…','Loading your data from the cloud…'));
+ try{await load()}catch(x){UID=null;console.error('load',x);ldErr(x);return}
+ LANG=S.lang||LANG;S.lang=LANG;ls('tj_lang',LANG);
+ document.body.classList.add('in');$('#au').style.display='none';$('#au').innerHTML='';$('#app').style.display='';$('#bn').style.display='';
+ view='home';cur=new Date();cur.setDate(1);busy(null);R();
+ if(PS===null)save();
+ rtStart();
+ if(MIG){toast(L2('ย้ายข้อมูลเดิมในเครื่องขึ้นคลาวด์แล้ว: '+MIG+' รายการ','Moved your existing on-device data to the cloud: '+MIG+' trades'));MIG=0}
+ if(RECOV){RECOV=false;setTimeout(pwResetM,300)}}
+async function logout(){
+ if(UID){try{await flush()}catch(x){}}
+ try{await sb.auth.signOut()}catch(x){}
+ UID=null;U=null;rtStop();busy(null);if(document.body.classList.contains('in')||!$('#au').innerHTML)auth()}
 function setLang(c){LANG=c;ls('tj_lang',c);if(U){S.lang=c;save();R()}else auth()}
 const llist=q=>LG.filter(l=>l.join(' ').toLowerCase().includes(q.trim().toLowerCase())).map(l=>`<button class="btn ${l[0]==LANG?'bp':''}" onclick="setLang('${l[0]}')">${l[1]} <span class="opacity-60 text-xs">${l[2]}</span></button>`).join('')||'<span class="mu">—</span>',lsrch=v=>{$('#ll').innerHTML=llist(v)},addTag=(k,v)=>{v=v.trim();if(v&&!S[k].includes(v)){S[k].push(v);save();R();presetM()}};
 const hI=(l,c)=>`<div><div class="lb">${l}</div>${c}</div>`,hS=(k,op)=>`<select class="inp" data-k="${k}">${op.map(([v,l])=>`<option value="${v}" ${S[k]==v?'selected':''}>${l}</option>`).join('')}</select>`,hT=(k,v)=>`<label class="tg"><input type="checkbox" data-k="${k}" ${v?'checked':''}><i></i></label>`,sec=(t,c)=>`<div class="card p-4 mb-4"><div class="font-semibold mb-3">${t}</div>${c}</div>`,
@@ -356,10 +614,10 @@ function syncForm(){const f=$('#pn form');if(!f||$('#ov').classList.contains('hi
 function acctM(){sheet(L2('บัญชีเทรด & ทุน','Trading accounts'),`<p class="mu text-xs mb-3">${L2('เพิ่มบัญชีได้ไม่จำกัด เช่น Exness, FTMO, บัญชีทดลอง — ใส่ชื่อกับทุนเริ่มต้น','Add as many accounts as you like (broker, FTMO…). Name + starting capital.')}</p><div class="lb">Account · Starting Capital</div>${S.accts.map((a,x)=>`<div class="flex gap-2 mb-2"><input class="inp" data-ac="${x},n" value="${esc(a.n)}"><input class="inp !w-32" type="number" data-ac="${x},b" value="${a.b}"><button class="btn bd" onclick="cf('Delete',esc(S.accts[${x}].n),'Delete',()=>rmx('accts',${x},'acctM'))">✕</button></div>`).join('')}<button class="btn bp" onclick="S.accts.push({n:'New Account',b:10000});save();R();acctM()">+ Account</button><div class="mt-4">${hI('Base Currency',hS('cur',[['USD','USD'],['THB','THB'],['EUR','EUR']]))}</div>`)}
 function presetM(){sheet(L2('คู่เงิน & ตัวเลือกในฟอร์มเทรด','Pairs & trade-form options'),`<div class="lb">Symbol · Contract size</div>${S.assets.map((a,x)=>`<div class="flex gap-2 mb-2"><input class="inp" data-as="${x},s" value="${a.s}"><input class="inp !w-32" type="number" step="any" data-as="${x},c" value="${a.c}"><button class="btn bd" onclick="rmx('assets',${x},'presetM')">✕</button></div>`).join('')}<button class="btn mb-4" onclick="S.assets.push({s:'NEW',c:1});save();R();presetM()">+ Asset</button><div class="grid gap-4">${tagH('Entry Triggers','trig')}${tagH('Timeframes','tf')}${tagH('Sessions','ses')}${tagH('Psychology & Mistakes Tags','mist')}</div>`)}
 function riskM(){sheet('Risk Management',`<div class="flex items-center justify-between mb-3"><span>Daily Loss Alert</span>${hT('aLoss',S.aLoss)}</div><div class="grid grid-cols-2 gap-3 mb-3">${hI('Max Daily Loss',`<input class="inp" type="number" data-k="maxLoss" value="${S.maxLoss}">`)}${hI('Loss Unit',hS('lu',[['$','Amount ($)'],['%','Percent (%)']]))}</div><div class="flex items-center justify-between mb-3"><span>Overtrading Alert</span>${hT('aTr',S.aTr)}</div>${hI('Max Trades/Day',`<input class="inp" type="number" data-k="maxTr" value="${S.maxTr}">`)}`)}
-function dataM(){sheet(L2('ข้อมูล: นำเข้า · สำรอง · ลบ','Data: import · backup · delete'),`<div class="grid gap-3"><div class="dc"><b>⬆ ${L2('นำเข้าประวัติ','Import')}</b><p class="mu">${L2('ดึงไม้จากไฟล์ CSV ของ MT5 / Exness','Bring trades from an MT5 / Exness CSV.')}</p><button class="btn" onclick="shx();$('#fi').click()">Import CSV</button></div><div class="dc"><b>⬇ ${L2('สำรองข้อมูล','Backup')}</b><p class="mu">${L2('ดาวน์โหลดประวัติทั้งหมด (CSV เปิดใน Excel / JSON ไว้กู้คืน)','Download all trades (CSV for Excel / JSON to restore).')}</p><div class="flex gap-2 flex-wrap"><button class="btn" onclick="dlf('trades.csv',csv(),'text/csv')">Export CSV</button><button class="btn" onclick="dlf('trades-backup.json',JSON.stringify({settings:S,trades:T},null,1),'application/json')">Export JSON</button></div></div><div class="dc dng"><b>🗑 ${L2('ล้างข้อมูล','Clear')}</b><p class="mu">${L2('ลบประวัติเทรดทุกรายการ (ถามยืนยันก่อนเสมอ)','Delete every trade (always asks first).')}</p><button class="btn bd" onclick="shx();askAll()">Delete all data</button></div></div>`)}
+function dataM(){sheet(L2('ข้อมูล: นำเข้า · สำรอง · ลบ','Data: import · backup · delete'),`${bkp()}<div class="grid gap-3"><div class="dc"><b>⬆ ${L2('นำเข้าประวัติ','Import')}</b><p class="mu">${L2('ดึงไม้จากไฟล์ CSV ของ MT5 / Exness','Bring trades from an MT5 / Exness CSV.')}</p><button class="btn" onclick="shx();$('#fi').click()">Import CSV</button></div><div class="dc"><b>⬇ ${L2('สำรองข้อมูล','Backup')}</b><p class="mu">${L2('ดาวน์โหลดประวัติทั้งหมด (CSV เปิดใน Excel / JSON ไว้กู้คืน)','Download all trades (CSV for Excel / JSON to restore).')}</p><div class="flex gap-2 flex-wrap"><button class="btn" onclick="dlf('trades.csv',csv(),'text/csv')">Export CSV</button><button class="btn" onclick="dlf('trades-backup.json',JSON.stringify({settings:S,trades:T},null,1),'application/json')">Export JSON</button></div></div><div class="dc dng"><b>🗑 ${L2('ล้างข้อมูล','Clear')}</b><p class="mu">${L2('ลบประวัติเทรดทุกรายการ (ถามยืนยันก่อนเสมอ)','Delete every trade (always asks first).')}</p><button class="btn bd" onclick="shx();askAll()">Delete all data</button></div></div>`)}
 function sets(){const sc=(ic,ti,d,fn)=>`<div class="dc" style="cursor:pointer" onclick="${fn}"><b>${ic} ${ti}</b><p class="mu">${d}</p></div>`;
-$('#mn').innerHTML=sec('Profile',`<div class="flex items-center justify-between gap-2"><div><b>${esc(UN)}</b><div class="mu text-xs">${esc(U)}</div></div><button class="btn bd" onclick="logout()">Log Out / Switch Account</button></div>`)
-+sec('Language',`<input class="inp" placeholder="Search language…" oninput="lsrch(this.value)"><div id="ll" class="flex flex-wrap gap-2 mt-3">${llist('')}</div>`)
+$('#mn').innerHTML=bkp()+sec('Profile',`<div class="flex items-center justify-between gap-2"><div><b>${esc(UN)}</b><div class="mu text-xs">${esc(U)}</div></div><button class="btn bd" onclick="logout()">Log Out / Switch Account</button></div>`)
++sec(L2('คลาวด์ & การซิงค์','Cloud & sync'),`<div class="flex items-center justify-between gap-2 flex-wrap"><div class="min-w-0"><b>☁️ Supabase</b><div class="mu text-xs" id="cldst">${cloudTxt()}</div><div class="mu text-xs truncate">${esc(sbCfg().url)}</div></div><button class="btn" onclick="pull(false)">🔄 ${L2('ซิงค์ตอนนี้','Sync now')}</button></div>`)+sec('Language',`<input class="inp" placeholder="Search language…" oninput="lsrch(this.value)"><div id="ll" class="flex flex-wrap gap-2 mt-3">${llist('')}</div>`)
 +sec(L2('ทางลัด — ของทุกอย่างอยู่ที่นี่ (และที่แถบด้านบนทุกหน้า)','Shortcuts — everything lives here (and in the top bar on every page)'),`<div class="grid md:grid-cols-2 gap-3">${sc('🏦',L2('บัญชีเทรด & ทุน','Accounts & capital'),L2('เพิ่ม/ลบบัญชี เช่น FTMO, ตั้งทุนเริ่มต้น, สกุลเงิน','Add/remove accounts (e.g. FTMO), capital, currency'),'acctM()')}${sc('✏️',L2('คู่เงิน & ตัวเลือก','Pairs & options'),L2('สินทรัพย์ Entry Trigger Timeframe Session แท็กจิตวิทยา (เพิ่มได้จากฟอร์มเทรดด้วย)','Assets, triggers, timeframes, sessions, tags (also from the trade form)'),'presetM()')}${sc('🛡',L2('กฎความเสี่ยง','Risk rules'),L2('เตือนขาดทุนรายวัน / เทรดเกินจำนวน','Daily loss & overtrading alerts'),'riskM()')}${sc('📂',L2('ข้อมูล','Data'),L2('นำเข้า · สำรอง · ลบทั้งหมด','Import · backup · delete all'),'dataM()')}</div>`)}
 document.addEventListener('change',e=>{const el=e.target,d=el.dataset;if(d.k)S[d.k]=el.type=='checkbox'?el.checked:el.value!==''&&!isNaN(el.value)?+el.value:el.value;else if(d.ac){const[x,f]=d.ac.split(','),old=S.accts[x].n;S.accts[x][f]=f=='b'?+el.value:el.value;if(f=='n'){T.forEach(t=>{if(t.acct==old)t.acct=el.value});if(S.acct==old)S.acct=el.value}}else if(d.as){const[x,f]=d.as.split(',');S.assets[x][f]=f=='c'?+el.value:el.value.toUpperCase()}else return;save();R()});
 const stage=()=>{const H=[[48,72,60,104,86,132],[38,56,84,66,100,78]];let k=0;return`<div class="st"><div class="sc"><div class="sr"><div class="flr"></div>${H.map((row,r)=>row.map((h,i)=>{const c=i==0||h>=row[i-1]?'#2ee59d':'#ff5c7c';return`<div class="bw" style="transform:translate3d(${((i-2.5)*44)|0}px,0,${r?-38:38}px)"><div class="bx" style="--h:${h}px;--c:${c};--k:${k++}"><i></i><i></i><i></i><i></i><i></i></div></div>`}).join('')).join('')}</div></div></div>`};
@@ -435,6 +693,6 @@ function home(){const a=F(),tk=iso(new Date()),mk=tk.slice(0,7),d=st(a.filter(t=
 <div class="flex items-center justify-between gap-3 flex-wrap mb-2"><b id="tvn">${et(tvName(sy))} · ${et(sy)}</b><a id="tvo" class="lnk text-xs" target="_blank" rel="noopener noreferrer" href="https://www.tradingview.com/chart/?symbol=${encodeURIComponent(sy)}">${L2('เปิดเต็มจอบน TradingView ↗','Open full screen on TradingView ↗')}</a></div>
 <div id="tvc"></div>
 <p class="mu text-xs mt-4 text-center">${L2('กราฟและราคาโดย <a class="lnk" href="https://www.tradingview.com" target="_blank" rel="noopener noreferrer">TradingView</a> · ราคาบางตลาด (เช่น หุ้น) อาจดีเลย์ตามเงื่อนไขของตลาด · ใช้ดูข้อมูลเท่านั้น ไม่ใช่คำแนะนำการลงทุน','Charts and prices by <a class="lnk" href="https://www.tradingview.com" target="_blank" rel="noopener noreferrer">TradingView</a> · some markets (e.g. stocks) may be delayed per exchange rules · for information only, not investment advice')}</p>`;tvTape('tvt');tvDraw()}
-(function(){let q=null;try{q=JSON.parse(ls('tj_sess'))}catch(e){}LANG=ls('tj_lang')||'th';q&&q.u?enter(q.u,q.n):auth()})();
+(function(){LANG=ls('tj_lang')||'th';const c=sbCfg();if(c.url&&c.key&&sbInit(c.url,c.key)){busy(L2('กำลังตรวจสอบการเข้าสู่ระบบ…','Checking your session…'));setTimeout(()=>{if(!UID&&!$('#au').innerHTML){busy(null);auth()}},10000)}else auth()})();
 
 </script></body></html>
